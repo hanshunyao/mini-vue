@@ -2,7 +2,7 @@
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-06 21:16:11
  * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 21:13:49
+ * @LastEditTime: 2025-03-07 22:10:32
  * @FilePath: \mini-vue\src\reactivity\tests\effect.spec.ts
  * @Description: effect 单元测试
  */
@@ -123,7 +123,6 @@ describe('effect', () => {
     // 调用 effect 模块中的 stop 方法，停止依赖的触发
     stop(runner);
     obj.prop = 3;
-    obj.prop++;
     // 这个地方 函数就没有被 触发
     expect(dummy).toBe(2);
 
@@ -135,10 +134,14 @@ describe('effect', () => {
 
   it('events: onStop', () => {
     const onStop = vi.fn();
+
+    // 创建 effect 的时候，传入第二个参数 option 对象的 onStop 属性
+    // option.onStop 是一个函数
     const runner = effect(() => {}, {
       onStop,
     });
 
+    //　当调用 stop 的时候，onStop 会被执行一次，也就是 stop 函数的回调函数
     stop(runner);
     expect(onStop).toHaveBeenCalled();
   });

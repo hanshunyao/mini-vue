@@ -2,7 +2,7 @@
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 14:54:23
  * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 16:34:08
+ * @LastEditTime: 2025-03-07 22:25:30
  * @FilePath: \mini-vue\src\reactivity\reactive.ts
  * @Description: reactive 的主逻辑
  */
@@ -10,22 +10,20 @@ import {
   mutableHandlers,
   readonlyHandlers,
   shallowReadonlyHandlers,
-} from "./baseHandlers";
+} from './baseHandlers';
 
 export const reactiveMap = new WeakMap();
 export const readonlyMap = new WeakMap();
 export const shallowReadonlyMap = new WeakMap();
 
 export const enum ReactiveFlags {
-  IS_REACTIVE = "__v_isReactive",
-  IS_READONLY = "__v_isReadonly",
-  RAW = "__v_raw",
+  IS_REACTIVE = '__v_isReactive',
+  IS_READONLY = '__v_isReadonly',
+  RAW = '__v_raw',
 }
 
 export function reactive(target) {
-  // createReactiveObject 
-  // 1. 创建一个响应式对象
-  // 2. 将 
+  // createReactiveObject 提出公共方法，可以根据传入参数的不同实现 readonly 、readonly 和 shallowReadonly 功能
   return createReactiveObject(target, reactiveMap, mutableHandlers);
 }
 
@@ -84,7 +82,7 @@ function createReactiveObject(target, proxyMap, baseHandlers) {
 
   const proxy = new Proxy(target, baseHandlers);
 
-  // 把创建好的 proxy 给存起来，
+  // 把创建好的 proxy 给存起来
   proxyMap.set(target, proxy);
   return proxy;
 }

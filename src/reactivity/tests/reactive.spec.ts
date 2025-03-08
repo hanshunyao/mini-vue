@@ -2,13 +2,13 @@
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 14:50:42
  * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 17:25:10
+ * @LastEditTime: 2025-03-07 21:52:27
  * @FilePath: \mini-vue\src\reactivity\tests\reactive.spec.ts
  * @Description: 单元测试 reactive
  */
-import { reactive, isReactive, toRaw, reactiveMap } from "../reactive";
-describe("reactive", () => {
-  test("happy path", () => {
+import { reactive, isReactive, toRaw, reactiveMap } from '../reactive';
+describe('reactive', () => {
+  test('happy path', () => {
     const original = { foo: 1 };
     // 创建一个响应式对象
     const observed = reactive(original);
@@ -20,13 +20,11 @@ describe("reactive", () => {
     expect(isReactive(original)).toBe(false);
     // 调用了 basehandleer 里面的 get 方法，获取到1
     expect(observed.foo).toBe(1);
-    //     // has
-    expect("foo" in observed).toBe(true);
-    //     // ownKeys
-    expect(Object.keys(observed)).toEqual(["foo"]);
+    expect('foo' in observed).toBe(true);
+    expect(Object.keys(observed)).toEqual(['foo']);
   });
 
-  test("nested reactives", () => {
+  test('nested reactives', () => {
     const original = {
       nested: {
         foo: 1,
@@ -39,7 +37,7 @@ describe("reactive", () => {
     expect(isReactive(observed.array[0])).toBe(true);
   });
 
-  test("toRaw", () => {
+  test('toRaw', () => {
     const original = { foo: 1 };
     const observed = reactive(original);
     expect(toRaw(observed)).toBe(original);

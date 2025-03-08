@@ -2,12 +2,12 @@
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 14:56:39
  * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 21:32:24
+ * @LastEditTime: 2025-03-07 22:19:20
  * @FilePath: \mini-vue\src\reactivity\effect.ts
  * @Description: effect 逻辑
  */
-import { createDep } from "./dep";
-import { extend } from "@mini-vue/shared";
+import { createDep } from './dep';
+import { extend } from '@mini-vue/shared';
 
 let activeEffect = void 0;
 let shouldTrack = false;
@@ -15,16 +15,23 @@ const targetMap = new WeakMap();
 
 // 用于依赖收集
 export class ReactiveEffect {
+  // 默认状态 true , 当调用 stop 后变为 false 后续再次调用stop 跳过遍历逻辑 节省效率
   active = true;
   //　反向收集 依赖 , deps 里面装的是 所有依赖该实例的响应式对象
   deps = [];
+  // effect 第二个参数 options.onStop
+  // 用于在 stop 后的回调函数
   public onStop?: () => void;
+  // fn 是用户传入的函数
+  // scheduler 可选
+  // trigger 执行时 如果有 scheduler 就执行 effect 的 scheduler
+  // 如果没有 就执行 effect.run
   constructor(public fn, public scheduler?) {
-    console.log("创建 ReactiveEffect 对象");
+    console.log('创建 ReactiveEffect 对象');
   }
 
   run() {
-    console.log("run");
+    console.log('run');
     // 运行 run 的时候，可以控制 要不要执行后续收集依赖的一步
     // 目前来看的话，只要执行了 fn 那么就默认执行了收集依赖
     // 这里就需要控制了
@@ -44,7 +51,7 @@ export class ReactiveEffect {
     // 利用全局属性来获取当前的 effect
     activeEffect = this as any;
     // 执行用户传入的 fn
-    console.log("执行用户传入的 fn");
+    console.log('执行用户传入的 fn');
     const result = this.fn();
     // 重置
     shouldTrack = false;
@@ -58,6 +65,7 @@ export class ReactiveEffect {
       // 如果第一次执行 stop 后 active 就 false 了
       // 这是为了防止重复的调用，执行 stop 逻辑
       cleanupEffect(this);
+      // 如果传入了 option.onStop 就在 stop 后执行函数
       if (this.onStop) {
         this.onStop();
       }
@@ -83,7 +91,9 @@ export function effect(fn, options = {}) {
   const _effect = new ReactiveEffect(fn);
 
   // 把用户传过来的值合并到 _effect 对象上去
-  // 缺点就是不是显式的，看代码的时候并不知道有什么值
+  // 优点是 后续不管 options 有多少个属性，都可以合并到 _effect 对象上
+  // 缺点就是不是显式的，看代码的时候并不知道有什么属性
+  // 这个地方 参考 @vue/shared 把公共方法提取到了 shared 中，其实封装的就是 Object.assign
   extend(_effect, options);
   _effect.run();
 
@@ -105,7 +115,8 @@ export function track(target, type, key) {
     return;
   }
   console.log(`触发 track -> target: ${target} type:${type} key:${key}`);
-  // 1. 先基于 target 找到对应的 dep
+  // 先基于 对象 找到对应的 map
+  // 这个 map 是所有的依赖数据
   // 如果是第一次的话，那么就需要初始化
   let depsMap = targetMap.get(target);
   if (!depsMap) {
@@ -113,7 +124,8 @@ export function track(target, type, key) {
     depsMap = new Map();
     targetMap.set(target, depsMap);
   }
-
+  // 通过 对象 改变的 key 来查询 所有的依赖 effect
+  // 这里 查出来的 dep 是一个 set 来确保 依赖不会被重复收集
   let dep = depsMap.get(key);
 
   if (!dep) {
@@ -125,7 +137,8 @@ export function track(target, type, key) {
 }
 
 export function trackEffects(dep) {
-  // 用 dep 来存放所有的 effect
+  // 传进来的 dep 是 该 key 之前所对应的 effect 列表
+  // 要把新收集到的 effct 加入到 dep 中
 
   // 这里是一个优化点
   // 先看看这个依赖是不是已经收集了，

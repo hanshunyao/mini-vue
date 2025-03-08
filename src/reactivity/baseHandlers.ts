@@ -2,7 +2,7 @@
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 14:56:30
  * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 16:41:28
+ * @LastEditTime: 2025-03-07 22:24:02
  * @FilePath: \mini-vue\src\reactivity\baseHandlers.ts
  * @Description: 用于生成响应式对象的 getter 和 setter
  */
@@ -47,10 +47,7 @@ function createGetter(isReadonly = false, shallow = false) {
 
     const res = Reflect.get(target, key, receiver);
 
-    // 问题：为什么是 readonly 的时候不做依赖收集呢
-    // readonly 的话，是不可以被 set 的， 那不可以被 set 就意味着不会触发 trigger
-    // 所有就没有收集依赖的必要了
-
+    // readonly 不会触发 set 操作，所以也不用进行依赖收集
     if (!isReadonly) {
       // 在触发 get 的时候进行依赖收集
       track(target, "get", key);
@@ -85,7 +82,7 @@ function createSetter() {
 export const readonlyHandlers = {
   get: readonlyGet,
   set(target, key) {
-    // readonly 的响应式对象不可以修改值
+    // readonly 的响应式对象不可以修改值，直接抛出警告
     console.warn(
       `Set operation on key "${String(key)}" failed: target is readonly.`,
       target
