@@ -1,8 +1,16 @@
+/*
+ * @Author: Hansy hanshunyao_hansy@163.com
+ * @Date: 2025-03-08 14:42:33
+ * @LastEditors: Hansy hanshunyao_hansy@163.com
+ * @LastEditTime: 2025-03-09 19:11:46
+ * @FilePath: \mini-vue\src\reactivity\tests\ref.spec.ts
+ * @Description: ref 单元测试
+ */
 import { effect } from "../effect";
 import { reactive } from "../reactive";
 import { isRef, ref, unRef,proxyRefs } from "../ref";
 describe("ref", () => {
-  it("should be reactive", () => {
+  it("测试 应该是响应式数据", () => {
     const a = ref(1);
     let dummy;
     let calls = 0;
@@ -15,13 +23,13 @@ describe("ref", () => {
     a.value = 2;
     expect(calls).toBe(2);
     expect(dummy).toBe(2);
-    // same value should not trigger
+    // 如果重新赋值相同的值的话，不会触发依赖
     a.value = 2;
     expect(calls).toBe(2);
     expect(dummy).toBe(2);
   });
 
-  it("should make nested properties reactive", () => {
+  it("测试 ref 传过来的 value 是对象时使用 reactive 包裹", () => {
     const a = ref({
       count: 1,
     });
@@ -37,22 +45,24 @@ describe("ref", () => {
   it("proxyRefs", () => {
     const user = {
       age: ref(10),
-      name: "xiaohong",
+      name: "hansy",
     };
+    // 使用 proxyRefs 属性后 后序访问属性就不用 .value 了
     const proxyUser = proxyRefs(user);
     expect(user.age.value).toBe(10);
     expect(proxyUser.age).toBe(10);
-    expect(proxyUser.name).toBe("xiaohong");
+    expect(proxyUser.name).toBe("hansy");
 
-    (proxyUser as any).age = 20;
-    expect(proxyUser.age).toBe(20);
-    expect(user.age.value).toBe(20);
+    (proxyUser as any).age = 26;
+    expect(proxyUser.age).toBe(26);
+    expect(user.age.value).toBe(26);
 
-    proxyUser.age = ref(10);
-    expect(proxyUser.age).toBe(10);
-    expect(user.age.value).toBe(10);
+    proxyUser.age = ref(11);
+    expect(proxyUser.age).toBe(11);
+    expect(user.age.value).toBe(11);
   });
 
+  // 判断是不是 ref
   it("isRef", () => {
     const a = ref(1);
     const user = reactive({
@@ -63,6 +73,8 @@ describe("ref", () => {
     expect(isRef(user)).toBe(false);
   });
 
+  // 如果是 ref 类型的话，那么就返回 value
+  // 如果不是的话，那么就返回本身
   it("unRef", () => {
     const a = ref(1);
     expect(unRef(a)).toBe(1);

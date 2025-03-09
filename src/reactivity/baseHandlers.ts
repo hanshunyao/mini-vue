@@ -1,8 +1,8 @@
 /*
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 14:56:30
- * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 22:24:02
+ * @LastEditors: Hansy hanshunyao_hansy@163.com
+ * @LastEditTime: 2025-03-09 18:17:35
  * @FilePath: \mini-vue\src\reactivity\baseHandlers.ts
  * @Description: 用于生成响应式对象的 getter 和 setter
  */
@@ -53,14 +53,16 @@ function createGetter(isReadonly = false, shallow = false) {
       track(target, "get", key);
     }
 
+    // 浅层的 readonly 内部对象不是响应式对象 不需要递归，直接返回
     if (shallow) {
       return res;
     }
 
     if (isObject(res)) {
-      // 把内部所有的是 object 的值都用 reactive 包裹，变成响应式对象
       // 如果说这个 res 值是一个对象的话，那么我们需要把获取到的 res 也转换成 reactive
+      // 把内部所有的是 object 的值都用 reactive 包裹，变成响应式对象
       // res 等于 target[key]
+      // 如果 target 是只读的，那么 res 也应该是只读的
       return isReadonly ? readonly(res) : reactive(res);
     }
 

@@ -1,15 +1,19 @@
 /*
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 14:56:39
- * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 22:19:20
+ * @LastEditors: Hansy hanshunyao_hansy@163.com
+ * @LastEditTime: 2025-03-09 18:51:15
  * @FilePath: \mini-vue\src\reactivity\effect.ts
- * @Description: effect 逻辑
+ * @Description: effect 主逻辑
  */
 import { createDep } from './dep';
 import { extend } from '@mini-vue/shared';
 
 let activeEffect = void 0;
+
+// 用于判断是否要执行依赖收集
+// 只有在 effect 函数执行的时候，才会执行依赖收集
+// 其他情况都不会执行依赖收集
 let shouldTrack = false;
 const targetMap = new WeakMap();
 
@@ -17,7 +21,7 @@ const targetMap = new WeakMap();
 export class ReactiveEffect {
   // 默认状态 true , 当调用 stop 后变为 false 后续再次调用stop 跳过遍历逻辑 节省效率
   active = true;
-  //　反向收集 依赖 , deps 里面装的是 所有依赖该实例的响应式对象
+  //　反向收集 依赖 , deps 里面装的是 所有该实例依赖的所有响应式对象
   deps = [];
   // effect 第二个参数 options.onStop
   // 用于在 stop 后的回调函数
@@ -32,19 +36,13 @@ export class ReactiveEffect {
 
   run() {
     console.log('run');
-    // 运行 run 的时候，可以控制 要不要执行后续收集依赖的一步
-    // 目前来看的话，只要执行了 fn 那么就默认执行了收集依赖
-    // 这里就需要控制了
-
-    // 是不是收集依赖的变量
-
-    // 执行 fn  但是不收集依赖
+    // 判断 这个函数 有没有被 stop
     if (!this.active) {
+      // 如果被 stop 了，执行函数 返回函数 但是不收集依赖
       return this.fn();
     }
 
-    // 执行 fn  收集依赖
-    // 可以开始收集依赖了
+    // 如果 effect 是 active 状态的时候 标记开始收集依赖
     shouldTrack = true;
 
     // 执行的时候给全局的 activeEffect 赋值
@@ -52,9 +50,12 @@ export class ReactiveEffect {
     activeEffect = this as any;
     // 执行用户传入的 fn
     console.log('执行用户传入的 fn');
+    // 这个地方执行 用户传来的函数 会触发 get =》 track 操作进行收集依赖
     const result = this.fn();
-    // 重置
+
+    // 收集依赖后 关闭依赖收集的标签
     shouldTrack = false;
+    // 清空 activeEffect 全局变量
     activeEffect = undefined;
 
     return result;
@@ -133,6 +134,10 @@ export function track(target, type, key) {
     depsMap.set(key, dep);
   }
 
+  // 这里把逻辑抽离出来 到 trackEffects 中
+  // reactive 需要寻找 它对应 key 的 依赖集合列表
+  // 而 ref 不需要这一步，所以 如果是 ref 调用的时候 就直接 调用 trackEffects 就可以了
+  // 而 reactive 就调用 track 找到对应的 set 再进行 trackEffects
   trackEffects(dep);
 }
 
@@ -178,12 +183,19 @@ export function trigger(target, type, key) {
     // 这里解构 dep 得到的是 dep 内部存储的 effect
     effects.push(...dep);
   });
-  // 这里的目的是只有一个 dep ，这个dep 里面包含所有的 effect
-  // 这里的目前应该是为了 triggerEffects 这个函数的复用
+  
+  // 这里把逻辑抽离出来 到 triggerEffects 中
+  // reactive 需要寻找 它需要触发的对应 key 的 依赖集合列表
+  // 而 ref 不需要这一步，所以 如果是 ref 调用的时候 就直接 调用 triggerEffects 就可以了
+  // 而 reactive 就调用 trigger 找到对应的 set 再进行 triggerEffects
   triggerEffects(createDep(effects));
 }
 
 export function isTracking() {
+  // 只有在 effect 函数执行的时候，才会执行依赖收集
+  // 这个地方使用 shouldTrack 这个变量来控制是否执行依赖收集
+  // 第一点是 如果 effect被 stop 了或者是 响应式对象使用了 ++ 操作（++操作可以拆分出2步 1步是set 1步是get）
+  // 第二点是 如果 响应式对象 没有依赖 只是调用了 get 方法，这个时候 get 会触发依赖收集，所以 activerEffect 本来就应该是没有值的 就跳过依赖收集
   return shouldTrack && activeEffect !== undefined;
 }
 

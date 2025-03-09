@@ -1,10 +1,10 @@
 /*
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 14:50:42
- * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 21:52:27
+ * @LastEditors: Hansy hanshunyao_hansy@163.com
+ * @LastEditTime: 2025-03-09 22:00:52
  * @FilePath: \mini-vue\src\reactivity\tests\reactive.spec.ts
- * @Description: 单元测试 reactive
+ * @Description: reactive 单元测试
  */
 import { reactive, isReactive, toRaw, reactiveMap } from '../reactive';
 describe('reactive', () => {
@@ -24,7 +24,7 @@ describe('reactive', () => {
     expect(Object.keys(observed)).toEqual(['foo']);
   });
 
-  test('nested reactives', () => {
+  test('测试 响应式对象内部的对象也应该是响应式', () => {
     const original = {
       nested: {
         foo: 1,

@@ -1,8 +1,8 @@
 /*
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-06 21:16:11
- * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 22:10:32
+ * @LastEditors: Hansy hanshunyao_hansy@163.com
+ * @LastEditTime: 2025-03-08 16:34:24
  * @FilePath: \mini-vue\src\reactivity\tests\effect.spec.ts
  * @Description: effect 单元测试
  */
@@ -122,7 +122,12 @@ describe('effect', () => {
     expect(dummy).toBe(2);
     // 调用 effect 模块中的 stop 方法，停止依赖的触发
     stop(runner);
-    obj.prop = 3;
+    // 案例1：直接重新复制，案例通过
+    // obj.prop = 3;
+    // 案例2：使用 ++ 操作，案例不通过，因为 ++ 操作是先取值，再赋值
+    // 取值的时候，会触发 get 操作，get 操作会触发 track 函数
+    // 所以会把 effect 函数再次收集起来，之前就白删除了
+    obj.prop++;
     // 这个地方 函数就没有被 触发
     expect(dummy).toBe(2);
 

@@ -1,10 +1,10 @@
 /*
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 16:32:05
- * @LastEditors: hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-07 16:55:17
+ * @LastEditors: Hansy hanshunyao_hansy@163.com
+ * @LastEditTime: 2025-03-09 22:11:12
  * @FilePath: \mini-vue\src\reactivity\tests\computed.spec.ts
- * @Description: computed 功能测试
+ * @Description: computed 单元测试
  */
 import { computed } from "../computed";
 import { reactive } from "../reactive";
@@ -24,7 +24,7 @@ describe("computed", () => {
     expect(getter.value).toBe(2);
   });
 
-  it("should compute lazily", () => {
+  it("测试 computed 应该被懒执行", () => {
     const value = reactive({
       foo: 1,
     });
@@ -33,13 +33,13 @@ describe("computed", () => {
     });
     const cValue = computed(getter);
 
-    // lazy
+    // 如果没有调用 cValue.value 的话，那么 getter 就不会被调用
     expect(getter).not.toHaveBeenCalled();
-
+    // 调用 cValue.value 的时候，getter 才会被调用
     expect(cValue.value).toBe(1);
     expect(getter).toHaveBeenCalledTimes(1);
 
-    // should not compute again
+    // get value 不应该被调用2次
     cValue.value;
     expect(getter).toHaveBeenCalledTimes(1);
 
@@ -47,7 +47,7 @@ describe("computed", () => {
     value.foo = 2;
     expect(getter).toHaveBeenCalledTimes(1);
 
-    // now it should compute
+    // 获取值的时候 重新执行
     expect(cValue.value).toBe(2);
     expect(getter).toHaveBeenCalledTimes(2);
 
