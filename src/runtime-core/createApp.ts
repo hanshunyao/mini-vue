@@ -3,8 +3,7 @@ import { createVNode } from "./vnode";
 
 // 这里 调用 createdApp 传入 根组件
 // 然后返回一个 app 对象
-function createApp(rootComponent) {
-
+export function createApp(rootComponent) {
   // 返回的对象中 有着 mount 方法用于挂载根节点
   // 这里的 rootContainer 就是根节点
   const app = {

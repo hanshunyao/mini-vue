@@ -2,9 +2,12 @@
   "name": "mini-vue",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "type": "module",
+  "main": "./lib/guide-mini-vue.cjs.js",
+  "module": "./lib/guide-mini-vue.esm-bundler.js",
   "scripts": {
-    "test": "vitest"
+    "test": "vitest",
+    "build": "rollup -c rollup.config.js"
   },
   "keywords": [],
   "author": "hansy",
@@ -14,11 +17,14 @@
     "@babel/core": "^7.26.9",
     "@babel/preset-env": "^7.26.9",
     "@babel/preset-typescript": "^7.26.0",
+    "@rollup/plugin-typescript": "^12.1.2",
     "@types/jest": "^29.5.14",
     "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
+    "rollup": "^4.35.0",
+    "tslib": "^2.8.1",
     "typescript": "^5.8.2",
-     "vitest": "^0.22.1"
+    "vitest": "^0.22.1"
   },
   "dependencies": {
     "@vue/reactivity": "^3.0.5",
