@@ -1,5 +1,7 @@
 import { createComponentInstance, setupComponent } from './component';
 import { isObject } from '../shared/index';
+import { ShapeFlags } from '../shared/index';
+
 export function render(vnode, container) {
   // 调用 patch
   // 后续方便递归
@@ -11,10 +13,13 @@ function patch(vnode, container) {
   // TODO：这个地方需要是初始化还是 update
   // 现在是直接处理 初始化
   // 后续会处理 update
-  if (typeof vnode.type === 'string') {
+  const { shapeFlag } = vnode;
+  // 这个地方使用 与的操作，与的特点是 都是1 ，结果才是 1，只要有一个是 0 ，结果就是 0
+  // ShapeFlags 中的类型 在其算表示的位上 为 1 其他位都是0 ，所以 只要是 这个 虚拟节点的该位上 为1 就返回有值，如果虚拟节点这位不是 1 那整个结果都是 0
+  if (shapeFlag & ShapeFlags.ELEMENT) {
     // 处理 element 类型
     processElement(vnode, container);
-  } else if (isObject(vnode.type)) {
+  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
     // 处理 component 类型
     processComponent(vnode, container);
   }
@@ -29,15 +34,15 @@ function processElement(vnode: any, container: any) {
 function mountElement(vnode: any, container: any) {
   const el = document.createElement(vnode.type);
   vnode.el = el;
-  const { children, props } = vnode;
+  const { props, shapeFlag } = vnode;
 
   // 如果 children 是 string 类型
-  if (typeof children === 'string') {
-    el.textContent = children;
-  } else if (Array.isArray(children)) {
+  if (shapeFlag & ShapeFlags.TEXT_CHILDREN) {
+    el.textContent = vnode.children;
+  } else if (shapeFlag & ShapeFlags.ARRAY_CHILDREN) {
     // 如果 children 是 array 类型
     // 递归处理
-    mountChildren(children, el);
+    mountChildren(vnode.children, el);
   }
   for (const key in props) {
     const val = props[key];
@@ -57,12 +62,12 @@ function processComponent(vnode: any, container: any) {
   mountComponent(vnode, container);
 }
 
-function mountComponent(vnode: any, container: any) {
+function mountComponent(initialVNode: any, container: any) {
   // 初始化组件
   console.log('初始化组件');
   // 通过虚拟节点 创建出 组件实例对象
   // 后面组件的所有属性都可以挂在到这个 实例对象上
-  const instance = createComponentInstance(vnode, container);
+  const instance = createComponentInstance(initialVNode, container);
 
   // 处理组件的 setup
   // setupComponent 处理3件事
@@ -73,9 +78,9 @@ function mountComponent(vnode: any, container: any) {
 
   // 在 setupComponent 中处理完 setup 并确认 render 函数存在后
   // 该调用 render 函数来生成 虚拟 dom 树
-  setupRenderEffect(instance, vnode, container);
+  setupRenderEffect(instance, initialVNode, container);
 }
-function setupRenderEffect(instance, vnode, container) {
+function setupRenderEffect(instance, initialVNode, container) {
   const { proxy } = instance;
   // subTree 就是组件的虚拟 dom 树
   // 这里 render 绑定一下 this 指向，指到 初始化时候的代理上
@@ -91,5 +96,5 @@ function setupRenderEffect(instance, vnode, container) {
   // 把内部需要渲染的 element 节点返回出来，之后通过 patch 挂在到对应的节点上
 
   // 这个地方处理完了所有的 element 节点，subTree 就是根节点
-  vnode.el = subTree.el;
+  initialVNode.el = subTree.el;
 }
