@@ -7,7 +7,7 @@
  * @Description: effect 主逻辑
  */
 import { createDep } from './dep';
-import { extend } from '@mini-vue/shared';
+import { extend } from '../shared/index';
 
 let activeEffect = void 0;
 

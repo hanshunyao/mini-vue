@@ -8,7 +8,7 @@
  */
 import { trackEffects, triggerEffects, isTracking } from "./effect";
 import { createDep } from "./dep";
-import { isObject, hasChanged } from "@mini-vue/shared";
+import { isObject, hasChanged } from "../shared/index";
 import { reactive } from "./reactive";
 
 // 这个的 ref 和 reactive 的区别就是

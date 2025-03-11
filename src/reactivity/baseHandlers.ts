@@ -1,8 +1,8 @@
 /*
  * @Author: hansy hanshunyao_hansy@163.com
  * @Date: 2025-03-07 14:56:30
- * @LastEditors: Hansy hanshunyao_hansy@163.com
- * @LastEditTime: 2025-03-09 18:17:35
+ * @LastEditors: hansy hanshunyao_hansy@163.com
+ * @LastEditTime: 2025-03-11 15:07:41
  * @FilePath: \mini-vue\src\reactivity\baseHandlers.ts
  * @Description: 用于生成响应式对象的 getter 和 setter
  */
@@ -15,7 +15,7 @@ import {
   readonlyMap,
   shallowReadonlyMap,
 } from "./reactive";
-import { isObject } from "@mini-vue/shared";
+import { isObject } from "../shared/index";
 
 const get = createGetter();
 const set = createSetter();
