@@ -5,6 +5,7 @@ export function createComponentInstance(vnode, parent) {
     // 这样后面使用的时候就不用 instance.vnode.type 了
     // 直接 instance.type 就可以了
     type: vnode.type,
+    setupState: {},
     parent,
   };
 
@@ -28,7 +29,26 @@ export function setupComponent(instance) {
 
 function setupStatefulComponent(instance: any) {
   const Component = instance.type;
-  // 结构出 组件中的 setup 方法
+
+  // 这里的空对象就是一个 ctx ，为的是访问 代理的时候直接能获取到 setupState 的属性
+  // 方便用户在 render 中 使用 this 就可以 访问 setup 中的属性
+  instance.proxy = new Proxy(
+    {},
+    {
+      get(target, key) {
+        const { setupState } = instance;
+        // 这里 看要获取的值在不在 setupState 中，在就返回
+        if (key in setupState) {
+          return setupState[key];
+        }
+
+        if (key === '$el') {
+          return instance.vnode.el;
+        }
+      },
+    }
+  );
+  // 解构出 组件中的 setup 方法
   const { setup } = Component;
   if (setup) {
     // 调用 setup 方法

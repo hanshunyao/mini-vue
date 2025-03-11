@@ -1,5 +1,5 @@
 import { createComponentInstance, setupComponent } from './component';
-
+import { isObject } from '../shared/index';
 export function render(vnode, container) {
   // 调用 patch
   // 后续方便递归
@@ -8,9 +8,48 @@ export function render(vnode, container) {
 }
 
 function patch(vnode, container) {
-  // TODO：这个地方需要判断 vnode 类型
-  // 现在是直接处理 components 类型
-  processComponent(vnode, container);
+  // TODO：这个地方需要是初始化还是 update
+  // 现在是直接处理 初始化
+  // 后续会处理 update
+  if (typeof vnode.type === 'string') {
+    // 处理 element 类型
+    processElement(vnode, container);
+  } else if (isObject(vnode.type)) {
+    // 处理 component 类型
+    processComponent(vnode, container);
+  }
+}
+
+function processElement(vnode: any, container: any) {
+  // 判断是初始化还是更新
+  // 现在是直接处理 初始化
+  mountElement(vnode, container);
+}
+
+function mountElement(vnode: any, container: any) {
+  const el = document.createElement(vnode.type);
+  vnode.el = el;
+  const { children, props } = vnode;
+
+  // 如果 children 是 string 类型
+  if (typeof children === 'string') {
+    el.textContent = children;
+  } else if (Array.isArray(children)) {
+    // 如果 children 是 array 类型
+    // 递归处理
+    mountChildren(children, el);
+  }
+  for (const key in props) {
+    const val = props[key];
+    el.setAttribute(key, val);
+  }
+  container.append(el);
+}
+
+function mountChildren(children: any[], el: any) {
+  children.forEach((v) => {
+    patch(v, el);
+  });
 }
 function processComponent(vnode: any, container: any) {
   // TODO：这个地方需要判断 是首次挂载还是节点更新
@@ -34,11 +73,13 @@ function mountComponent(vnode: any, container: any) {
 
   // 在 setupComponent 中处理完 setup 并确认 render 函数存在后
   // 该调用 render 函数来生成 虚拟 dom 树
-  setupRenderEffect(instance, container);
+  setupRenderEffect(instance, vnode, container);
 }
-function setupRenderEffect(instance, container) {
+function setupRenderEffect(instance, vnode, container) {
+  const { proxy } = instance;
   // subTree 就是组件的虚拟 dom 树
-  const subTree = instance.render();
+  // 这里 render 绑定一下 this 指向，指到 初始化时候的代理上
+  const subTree = instance.render.call(proxy);
 
   // vnode -> patch
   // vnode -> element -> mountElement
@@ -48,4 +89,7 @@ function setupRenderEffect(instance, container) {
   // 其上上面的操作 setupComponent 就是初始化 把 components 的信息收集到实例上
   // component 就相当于 一个箱子，调用 render 方法进行拆箱
   // 把内部需要渲染的 element 节点返回出来，之后通过 patch 挂在到对应的节点上
+
+  // 这个地方处理完了所有的 element 节点，subTree 就是根节点
+  vnode.el = subTree.el;
 }
