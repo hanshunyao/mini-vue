@@ -44,16 +44,26 @@ function mountElement(vnode: any, container: any) {
     // 递归处理
     mountChildren(vnode.children, el);
   }
+
+  const isOn = (key: string) => /^on[A-Z]/.test(key);
   for (const key in props) {
     const val = props[key];
-    el.setAttribute(key, val);
+
+    if (isOn(key)) {
+      const event = key.slice(2).toLowerCase();
+      el.addEventListener(event, val);
+    } else {
+      el.setAttribute(key, val);
+    }
   }
   container.append(el);
 }
 
 function mountChildren(children: any[], el: any) {
   children.forEach((v) => {
-    patch(v, el);
+    if (v) {
+      patch(v, el);
+    }
   });
 }
 function processComponent(vnode: any, container: any) {
