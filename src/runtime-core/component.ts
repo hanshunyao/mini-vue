@@ -60,12 +60,15 @@ function setupStatefulComponent(instance: any) {
     // 如果是 function 就认为是组件的 render 函数
     // 如果是 object 就把返回的对象注入到组件上下文中
 
-
+    // 这个地方在 调用 getCurrentInstance 之前就把值保存到全局变量中
+    setCurrentInstance(instance);
     const setupContext = createSetupContext(instance);
-
     // 这里调用 组件中的 setup 方法 并把 props 传进去
+    // 这里就 可能调用了 getCurrentInstance 方法，正好上面赋值好了，这里就可以动态的拿到这个组件的实例对象
+    // 这样就确保了 在不同的组件 setup 中 调用都可以拿到对应的 实例对象
     const setupResult = setup && setup(shallowReadonly(instance.props), setupContext);
-
+    // 这里调用完 setup 方法后，就把全局变量的值清空
+    currentInstance = null;
     handleSetupResult(instance, setupResult);
   }
 }
@@ -99,4 +102,17 @@ function finishComponentSetup(instance: any) {
   if (Component.render) {
     instance.render = Component.render;
   }
+}
+
+let currentInstance = null;
+// 这个接口暴露给用户，用户可以在 setup 中获取组件实例 instance
+export function getCurrentInstance(): any {
+  return currentInstance;
+}
+
+export function setCurrentInstance(instance) {
+  // 这个地方 把 赋值操作提取出来了，为的是 以后如果想看 这个变量的赋值情况，就在这个地方打上断点就可以方便调试
+  // 这个地方也起到了中间层的作用，如果后面多处调用了 赋值操作，如果没有抽象出来方法的话，不好找寻是哪出赋值的
+  // 这样把这个提取出来后，只需要在这里打上断点就可以通过 event 事件栈来看到是谁调用的
+  currentInstance = instance;
 }
