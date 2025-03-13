@@ -23,6 +23,9 @@ export function renderSlots(slots, name: string, props = {}) {
     // slot 就是一个函数，所以就可以把当前组件的一些数据给传出去，这个就是作用域插槽
     // 参数就是 props
     const slotContent = slot(props);
-    return createVNode('div', {}, slotContent);
+
+    // 这个 Fragment 是一个特殊标识， 在 patch 的时候 有判断， 如果 遇到这个表示，就挂载它的 children 即可
+    // Fragment 用的是 使用 symbol
+    return createVNode(Fragment, {}, slotContent);
   }
 }

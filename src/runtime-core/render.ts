@@ -1,6 +1,6 @@
 import { createComponentInstance, setupComponent } from './component';
-import { isObject } from '../shared/index';
 import { ShapeFlags } from '../shared/index';
+import { Fragment, Text } from './vnode';
 
 export function render(vnode, container) {
   // 调用 patch
@@ -13,16 +13,42 @@ function patch(vnode, container) {
   // TODO：这个地方需要是初始化还是 update
   // 现在是直接处理 初始化
   // 后续会处理 update
-  const { shapeFlag } = vnode;
+  const { type, shapeFlag } = vnode;
   // 这个地方使用 与的操作，与的特点是 都是1 ，结果才是 1，只要有一个是 0 ，结果就是 0
   // ShapeFlags 中的类型 在其算表示的位上 为 1 其他位都是0 ，所以 只要是 这个 虚拟节点的该位上 为1 就返回有值，如果虚拟节点这位不是 1 那整个结果都是 0
-  if (shapeFlag & ShapeFlags.ELEMENT) {
-    // 处理 element 类型
-    processElement(vnode, container);
-  } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
-    // 处理 component 类型
-    processComponent(vnode, container);
+  switch (type) {
+    case Text:
+      processText(vnode, container);
+      break;
+    // 其中还有几个类型比如： static fragment comment
+    case Fragment:
+      processFragment(vnode, container);
+      break;
+    default:
+      // 这里就基于 shapeFlag 来处理
+      if (shapeFlag & ShapeFlags.ELEMENT) {
+        console.log('处理 element');
+        processElement(vnode, container);
+      } else if (shapeFlag & ShapeFlags.STATEFUL_COMPONENT) {
+        console.log('处理 component');
+        processComponent(vnode, container);
+      }
   }
+}
+
+function processFragment(vnode: any, container: any) {
+  // 只需要渲染 children ，然后给添加到 container 内
+  // 初始化 Fragment 逻辑点
+  console.log('初始化 Fragment 类型的节点');
+  mountChildren(vnode.children, container);
+}
+
+function processText(vnode, container) {
+  console.log('处理 Text 节点');
+  // 初始化 Text 逻辑点
+  const { children } = vnode;
+  const textNode = (vnode.el = document.createTextNode(children));
+  container.append(textNode);
 }
 
 function processElement(vnode: any, container: any) {
@@ -61,9 +87,7 @@ function mountElement(vnode: any, container: any) {
 
 function mountChildren(children: any[], el: any) {
   children.forEach((v) => {
-    if (v) {
-      patch(v, el);
-    }
+    patch(v, el);
   });
 }
 function processComponent(vnode: any, container: any) {
