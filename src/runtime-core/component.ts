@@ -12,6 +12,8 @@ export function createComponentInstance(vnode, parent) {
     // 直接 instance.type 就可以了
     type: vnode.type,
     setupState: {},
+    //  获取 parent 的 provides 作为当前组件的初始化值 这样就可以继承 parent.provides 的属性了
+    provides: parent ? parent.provides : {}, 
     props: {},
     slots: {},
     parent,
