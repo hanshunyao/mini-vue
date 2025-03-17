@@ -1,4 +1,5 @@
-import { ShapeFlags } from '../shared/index';
+import { ShapeFlags } from '../shared/shapeFlags';
+export { createVNode as createElementVNode };
 
 // 这里后面两个参数可选
 export const createVNode = function (
@@ -6,13 +7,21 @@ export const createVNode = function (
   props?: any,
   children?: string | Array<any>
 ) {
+  // 注意 type 有可能是 string 也有可能是对象
+  // 如果是对象的话，那么就是用户设置的 options
+  // type 为 string 的时候
+  // createVNode("div")
+  // type 为组件对象的时候
+  // createVNode(App)
   const vnode = {
-    type,
-    props,
-    children,
-    shapeFlag: getShapeFlag(type),
     // 初始化时 el 设置为 null，后面这个字段用于存储根节点 通过 $el 访问
     el: null,
+    component: null,
+    key: props?.key,
+    type,
+    props: props || {},
+    children,
+    shapeFlag: getShapeFlag(type),
   };
 
   // 基于 children 再次设置 shapeFlag
@@ -26,12 +35,11 @@ export const createVNode = function (
 
   // 这里判断一下 children 是不是 slot 如果是 slot 位运算一下，后面处理
   normalizeChildren(vnode, children);
-
   return vnode;
 };
 
 export function normalizeChildren(vnode, children) {
-  if (typeof children === "object") {
+  if (typeof children === 'object') {
     // 暂时主要是为了标识出 slots_children 这个类型来
     // 暂时我们只有 element 类型和 component 类型的组件
     // 所以我们这里除了 element ，那么只要是 component 的话，那么children 肯定就是 slots 了
@@ -45,10 +53,10 @@ export function normalizeChildren(vnode, children) {
 }
 
 // 用 symbol 作为唯一标识
-export const Text = Symbol("Text");
-export const Fragment = Symbol("Fragment");
+export const Text = Symbol('Text');
+export const Fragment = Symbol('Fragment');
 
-export function createTextVNode(text: string = " ") {
+export function createTextVNode(text: string = ' ') {
   return createVNode(Text, {}, text);
 }
 
@@ -56,7 +64,7 @@ export function createTextVNode(text: string = " ") {
 // 其目的是为了让 child 支持多种格式
 export function normalizeVNode(child) {
   // 暂时只支持处理 child 为 string 和 number 的情况
-  if (typeof child === "string" || typeof child === "number") {
+  if (typeof child === 'string' || typeof child === 'number') {
     return createVNode(Text, null, String(child));
   } else {
     return child;

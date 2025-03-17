@@ -1,7 +1,6 @@
-import { camelize, hyphenate, toHandlerKey } from "../shared/index";
+import { camelize, hyphenate, toHandlerKey } from '../shared/index';
 export function emit(instance, event: string, ...rawArgs) {
-  console.log('emit',event);
-  
+  console.log('emit', event);
   // 1. emit 是基于 props 里面的 onXXX 的函数来进行匹配的
   // 所以我们先从 props 中看看是否有对应的 event handler
   const props = instance.props;
@@ -12,9 +11,8 @@ export function emit(instance, event: string, ...rawArgs) {
 
   // 如果上面没有匹配的话 那么在检测一下 event 是不是 kebab-case 类型
   if (!handler) {
-    handler = props[(toHandlerKey(hyphenate(event)))]
+    handler = props[toHandlerKey(hyphenate(event))];
   }
-
 
   if (handler) {
     handler(...rawArgs);

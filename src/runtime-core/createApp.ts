@@ -19,5 +19,5 @@ export function createAppAPI(render) {
       },
     };
     return app;
-  }
+  };
 }

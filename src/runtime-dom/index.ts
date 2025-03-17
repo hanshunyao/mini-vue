@@ -1,13 +1,26 @@
-import { createRenderer } from '../runtime-core/index';
-import { isOn } from '../shared/index';
+// 源码里面这些接口是由 runtime-dom 来实现
+// 这里先简单实现
+
+import { isOn } from "../shared/index";
+import { createRenderer } from "../runtime-core/index";
+
+// 后面也修改成和源码一样的实现
 function createElement(type) {
-  console.log('CreateElement', type);
+  console.log("CreateElement", type);
   const element = document.createElement(type);
   return element;
 }
 
+function createText(text) {
+  return document.createTextNode(text);
+}
+
+function setText(node, text) {
+  node.nodeValue = text;
+}
+
 function setElementText(el, text) {
-  console.log('SetElementText', el, text);
+  console.log("SetElementText", el, text);
   el.textContent = text;
 }
 
@@ -41,7 +54,7 @@ function patchProp(el, key, preValue, nextValue) {
       }
     }
   } else {
-    if (nextValue === null || nextValue === '') {
+    if (nextValue === null || nextValue === "") {
       el.removeAttribute(key);
     } else {
       el.setAttribute(key, nextValue);
@@ -49,25 +62,38 @@ function patchProp(el, key, preValue, nextValue) {
   }
 }
 
-function insert(child, parent) {
-  console.log('Insert');
-  parent.append(child)
+function insert(child, parent, anchor = null) {
+  console.log("Insert");
+  parent.insertBefore(child, anchor);
 }
 
-const renderer:any = createRenderer({
-  createElement,
-  patchProp,
-  insert,
-  setElementText,
-});
+function remove(child) {
+  const parent = child.parentNode;
+  if (parent) {
+    parent.removeChild(child);
+  }
+}
 
+let renderer;
 
-// 这个地方 runtime-dom 是基于 runtime-core 中的 createApp 方法，但是 createApp 中需要的 render 函数 又在 createRenderer 函数主 生成
-// 所以这个地方 直接 把 createApp 功能 也放在 一个 createAppAPI 中返回，在 createRenderer 中 调用 createAppAPI 生成 createApp 方法
-// 然后把 createApp 方法 挂载到 renderer 函数上，这里 就直接调用
+function ensureRenderer() {
+  // 如果 renderer 有值的话，那么以后都不会初始化了
+  return (
+    renderer ||
+    (renderer = createRenderer({
+      createElement,
+      createText,
+      setText,
+      setElementText,
+      patchProp,
+      insert,
+      remove,
+    }))
+  );
+}
+
 export const createApp = (...args) => {
-  // 这里的 renderer 是使用默认 options 生成的 dom 渲染器下的 createApp 方法
-  // 如果想要自定义，可以直接在 外部调用 createRenderer 方法传入自定义option生成自定义的渲染函数
-  return renderer.createApp(...args);
+  return ensureRenderer().createApp(...args);
 };
-export * from '../runtime-core/index';
+
+export * from "../runtime-core"

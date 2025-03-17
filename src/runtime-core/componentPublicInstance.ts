@@ -9,6 +9,7 @@ const publicPropertiesMap = {
   $props: (i) => i.props,
 };
 
+// todo 需要让用户可以直接在 render 函数内直接使用 this 来触发 proxy
 export const PublicInstanceProxyHandlers = {
   get({ _: instance }, key) {
     // 用户访问 proxy[key]
@@ -16,6 +17,7 @@ export const PublicInstanceProxyHandlers = {
     // 有的话就直接调用这个 function
     const { setupState, props } = instance;
     console.log(`触发 proxy hook , key -> : ${key}`);
+
     if (key[0] !== '$') {
       // 说明不是访问 public api
       // 先检测访问的 key 是否存在于 setupState 中, 是的话直接返回
@@ -28,14 +30,13 @@ export const PublicInstanceProxyHandlers = {
       }
     }
 
-    // 看看 key 是不是在 publicPropertiesMap 中
-    // 有的话就直接调用
     const publicGetter = publicPropertiesMap[key];
 
     if (publicGetter) {
       return publicGetter(instance);
     }
   },
+
   set({ _: instance }, key, value) {
     const { setupState } = instance;
 
@@ -44,6 +45,6 @@ export const PublicInstanceProxyHandlers = {
       setupState[key] = value;
     }
 
-    return true
+    return true;
   },
 };

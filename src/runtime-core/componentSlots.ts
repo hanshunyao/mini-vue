@@ -2,9 +2,7 @@ import { ShapeFlags } from '../shared/shapeFlags';
 export function initSlots(instance, children) {
   // 把 children 存到 instance 上
   const { vnode } = instance;
-
   console.log('初始化 slots');
-
   // 前面 vnode 在 createVNode 中已经处理过了经过了位运算，这里可以筛选一下 如果是 slots 就特殊处理
   if (vnode.shapeFlag & ShapeFlags.SLOTS_CHILDREN) {
     normalizeObjectSlots(children, (instance.slots = {}));
