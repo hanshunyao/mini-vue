@@ -1,4 +1,4 @@
-import { h, renderSlots } from '../../lib/guide-mini-vue.esm.js';
+import { h, renderSlot } from '../../lib/guide-mini-vue.esm.js';
 export const Foo = {
   name: 'foo',
   setup() {
@@ -10,9 +10,9 @@ export const Foo = {
     const age = 18;
     return h('div', {}, [
       foo,
-      renderSlots(this.$slots, 'header',{age}),
-      renderSlots(this.$slots, 'body'),
-      renderSlots(this.$slots, 'footer'),
+      renderSlot(this.$slots, 'header',{age}),
+      renderSlot(this.$slots, 'body'),
+      renderSlot(this.$slots, 'footer'),
     ]);
   },
 };

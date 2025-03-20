@@ -12,8 +12,8 @@ import { createVNode, Fragment } from "../vnode";
  *
  * @private
  */
-export function renderSlots(slots, name: string, props = {}) {
-  // 这个地方 slots 就是  renderSlots(this.$slots, 'body'), 中 的 this.$slots，也就是 父组件的 slots
+export function renderSlot(slots, name: string, props = {}) {
+  // 这个地方 slots 就是  renderSlot(this.$slots, 'body'), 中 的 this.$slots，也就是 父组件的 slots
   // name 是 子组件 插槽的 key
   // 根据子组件 的插槽 key，去 父组件 中取对应的插槽数据 创建虚拟节点并返回
   const slot = slots[name];

@@ -11,6 +11,7 @@ export function createComponentInstance(vnode, parent) {
     // 直接 instance.type 就可以了
     type: vnode.type,
     vnode,
+    next: null, // 需要更新的 vnode，用于更新 component 类型的组件
     // 获取 parent 的 provides 作为当前组件的初始化值 这样就可以继承 parent.provides 的属性了
     provides: parent ? parent.provides : {},
     proxy: null,
@@ -131,7 +132,9 @@ function finishComponentSetup(instance: any) {
   const Component = instance.type;
 
   if (!instance.render) {
-    // 如果 compile 有值 并且当组件没有 render 函数，那么就需要把 template 编译成 render 函数
+    // 这里的 compile 是编译器，将模板渲染为 render 函数
+    // 如果 compile 有值 并且当组件没有 render 函数
+    // 那么就需要把 template 编译成 render 函数
     if (compile && !Component.render) {
       if (Component.template) {
         // 这里就是 runtime 模块和 compile 模块结合点
@@ -144,7 +147,7 @@ function finishComponentSetup(instance: any) {
   }
 }
 
-let currentInstance = null;
+let currentInstance = {};
 // 这个接口暴露给用户，用户可以在 setup 中获取组件实例 instance
 export function getCurrentInstance(): any {
   return currentInstance;
@@ -159,5 +162,6 @@ export function setCurrentInstance(instance) {
 
 let compile;
 export function registerRuntimeCompiler(_compile) {
+  // 把 compile 挂在到全局变量
   compile = _compile;
 }

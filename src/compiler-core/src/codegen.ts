@@ -1,4 +1,4 @@
-import { isString } from "@mini-vue/shared";
+import { isString } from "../../shared/index";
 import { NodeTypes } from "./ast";
 import {
   CREATE_ELEMENT_VNODE,
