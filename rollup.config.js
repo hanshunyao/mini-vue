@@ -1,14 +1,17 @@
 import typescript from '@rollup/plugin-typescript';
 export default {
-  input: './src/index.ts',
+  input:"./packages/vue/src/index.ts",
   output: [
     {
-      format: 'cjs',
-      file: 'lib/guide-mini-vue.cjs.js',
+      format: "cjs",
+      file: "./packages/vue/dist/mini-vue.cjs.js",
+      sourcemap: true,
     },
     {
-      format: 'es',
-      file: 'lib/guide-mini-vue.esm.js',
+      name: "vue",
+      format: "es",
+      file: "./packages/vue/dist/mini-vue.esm-bundler.js",
+      sourcemap: true,
     },
   ],
   plugins: [typescript()],
